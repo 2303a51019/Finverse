@@ -1,4 +1,4 @@
-name: CodeSense CI/CD
+name: Expense-tracker
 
 on:
   push:
@@ -7,9 +7,10 @@ on:
     branches: [main]
 
 jobs:
-  test-backend:
-    name: Test Backend
+  build:
+    name: Build & Test Project
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -22,47 +23,18 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Install backend dependencies
+      - name: Install Backend Dependencies
         working-directory: ./backend
         run: npm install
 
-      - name: Run backend tests
+      - name: Run Backend Tests
         working-directory: ./backend
         run: npm test --if-present
 
-      - name: Install frontend dependencies
+      - name: Install Frontend Dependencies
         working-directory: ./frontend
         run: npm install
 
-      - name: Build React app
+      - name: Build React App
         working-directory: ./frontend
         run: npm run build
-
-  build-and-push:
-    name: Build & Push to Docker Hub
-    runs-on: ubuntu-latest
-    needs: test-backend
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Build & Push Backend image
-        uses: docker/build-push-action@v5
-        with:
-          context: ./backend
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/codesense-backend:latest
-
-      - name: Build & Push Frontend image
-        uses: docker/build-push-action@v5
-        with:
-          context: ./frontend
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/codesense-frontend:latest
-
